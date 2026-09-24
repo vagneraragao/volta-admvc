@@ -179,4 +179,5 @@ Command* na Vercel.
 - **Os logos são placeholders.** O ícone da garrafa em `src/ui.js` (componente `Marca`) e o
   favicon no `index.html` esperam a arte real da ADMVC e do programa VOLTA.
 #   v o l t a - a d m v c  
+ #   v o l t a - a d m v c  
  
