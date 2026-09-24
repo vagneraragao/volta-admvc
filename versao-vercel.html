@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Campanha VOLTA da ADMVC — contagem de garrafas retornáveis para a construção da Nova Sede.">
+  <meta name="theme-color" content="#0CC3D7">
+  <title>VOLTA ADMVC</title>
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230CC3D7'/><path d='M13 4h6v3.2c0 1.2.5 2.3 1.4 3.1l1.2 1.1c1.2 1.1 1.9 2.7 1.9 4.3V27a2 2 0 0 1-2 2H10.5a2 2 0 0 1-2-2V15.7c0-1.6.7-3.2 1.9-4.3l1.2-1.1C12.5 9.5 13 8.4 13 7.2V4Z' fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linejoin='round'/></svg>">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Albert Sans e Permanent Marker são as fontes do próprio volta.com.pt.
+       A Fraunces entra só para as Escrituras, separando a Palavra da interface. -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600;700;800;900&family=Permanent+Marker&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap">
+
+  <link rel="stylesheet" href="src/estilo.css">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Nota: este é o CDN de desenvolvimento do Tailwind. Ele funciona em
+    // produção, mas compila no navegador a cada carregamento e avisa no
+    // console. O README explica como trocar por um CSS pré-compilado.
+    tailwind.config = {
+      theme: {
+        extend: {
+          // Identidade do volta.com.pt: ciano dominante com branco.
+          colors: {
+            ciano: '#0CC3D7',
+            'ciano-2': '#0AA6B7',
+            'ciano-claro': '#7FE3EF',
+            agua: '#E8FAFC',
+            noite: '#062A30',
+            'noite-2': '#0B3A42',
+            'noite-3': '#14525C',
+            preto: '#101211',
+            creme: '#F7FAFB',
+            'creme-2': '#DCE8EA',
+            oliva: '#4A5D3A',
+            'oliva-2': '#2F3D26',
+            dourado: '#C89B4A',
+            tijolo: '#C1663A',
+            'tijolo-2': '#9E4F2B',
+            marinho: '#1B2A44',
+            'areia': '#EFEAE1',
+            tinta: '#101211',
+            'tinta-suave': '#5A6A6D',
+          },
+          fontFamily: {
+            display: ['Albert Sans', 'system-ui', 'sans-serif'],
+            marker: ['Permanent Marker', 'Comic Sans MS', 'cursive'],
+            serifa: ['Fraunces', 'Georgia', 'serif'],
+          },
+          // A escala padrão pula degraus (15, 35, 45, 65…) e os modificadores
+          // de cor — text-creme/45 — resolvem por ela.
+          opacity: (function () {
+            const escala = {};
+            for (let i = 0; i <= 100; i += 5) escala[String(i)] = String(i / 100);
+            return escala;
+          })(),
+        },
+      },
+    };
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/htm/3.1.1/htm.js"></script>
+</head>
+<body>
+  <!-- O conteúdo abaixo é substituído pelo React ao montar. Ele existe para
+       que um tablet com a rede ruim veja uma explicação em vez de tela branca. -->
+  <div id="raiz">
+    <div id="aviso-carregando" style="padding:32px;max-width:34rem;margin:0 auto;font-family:system-ui,sans-serif;color:#6B6F6C">
+      <p style="font-size:1.5rem;font-weight:800;color:#0AA6B7;margin:0 0 .5rem">volta · ADMVC</p>
+      <p id="texto-carregando" style="margin:0">Carregando a campanha…</p>
+      <p id="aviso-arquivo" hidden style="margin:1rem 0 0;padding:1rem;border-radius:.75rem;background:#E8FAFC;color:#101211">
+        <strong>Esta página foi aberta como arquivo, e assim ela não funciona.</strong><br>
+        O navegador bloqueia parte do código quando o endereço começa com
+        <code>file://</code>. Não é defeito da página: é uma regra de segurança do
+        próprio navegador.<br><br>
+        Use o endereço do site publicado (algo como
+        <code>volta-admvc.vercel.app</code>). Para testar nesta máquina, abra o
+        terminal na pasta do projeto e rode <code>python servir.py</code>.
+      </p>
+
+      <p id="aviso-falha" hidden style="margin:1rem 0 0;padding:1rem;border-radius:.75rem;background:#E8FAFC;color:#101211">
+        <strong>Não consegui carregar os componentes da página.</strong><br>
+        Isso quase sempre é a internet do aparelho. Confira a conexão e recarregue.
+      </p>
+    </div>
+  </div>
+
+  <noscript>
+    <p style="padding:24px;font-family:system-ui">
+      Esta aplicação precisa de JavaScript para registrar as doações da campanha VOLTA.
+    </p>
+  </noscript>
+
+  <script>
+    // O React substitui todo o conteúdo de #raiz ao montar. Se depois de alguns
+    // segundos o "carregando" ainda estiver na tela, o app NÃO montou — e aí o
+    // usuário precisa saber por quê, em vez de encarar um texto parado.
+    //
+    // São duas causas distintas, e a mensagem certa importa:
+    //   file://  o navegador bloqueia módulos ES abertos como arquivo;
+    //   online   algum script do CDN não chegou.
+    var comoArquivo = location.protocol === 'file:';
+
+    setTimeout(function () {
+      if (!document.getElementById('aviso-carregando')) return;   // montou, tudo certo
+
+      var alvo = document.getElementById(comoArquivo ? 'aviso-arquivo' : 'aviso-falha');
+      if (alvo) alvo.hidden = false;
+
+      var carregando = document.getElementById('texto-carregando');
+      if (carregando) carregando.hidden = true;
+      // Por file:// a falha é imediata e certa — não faz sentido deixar a
+      // pessoa esperando seis segundos por uma resposta que já se conhece.
+    }, comoArquivo ? 700 : 6000);
+  </script>
+
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>

@@ -13,6 +13,9 @@
 export const CAMINHOS = {
   mesa: '/',
   telao: '/telao',
+  obra: '/construcao',
+  carnes: '/carnes',
+  cofrinhos: '/cofrinhos',
   admin: '/admin',
 };
 
@@ -27,10 +30,13 @@ export function modoDaUrl() {
   caminho = caminho.replace(/(.)\/+$/, '$1');   // tira a barra final, menos da raiz
 
   if (caminho === '/telao') return 'telao';
+  if (caminho === '/construcao') return 'obra';
+  if (caminho === '/carnes') return 'carnes';
+  if (caminho === '/cofrinhos') return 'cofrinhos';
   if (caminho === '/admin') return 'admin';
 
   const doHash = (location.hash || '').replace(/^#\/?/, '');
-  if (doHash === 'telao' || doHash === 'admin' || doHash === 'mesa') return doHash;
+  if (['telao', 'obra', 'carnes', 'cofrinhos', 'admin', 'mesa'].indexOf(doHash) !== -1) return doHash;
 
   return 'mesa';
 }

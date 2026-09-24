@@ -1,1 +1,10 @@
-[]
+[
+    {
+        "arquivo": "1.png",
+        "legenda": "Maquete da Nova Sede 1"
+    },
+    {
+        "arquivo": "2.png",
+        "legenda": "Maquete da Nova Sede 2"
+    }
+]

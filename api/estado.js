@@ -10,8 +10,17 @@
 const CHAVE_TOTAL = 'volta:total';
 const CHAVE_CONFIG = 'volta:config';
 const CHAVE_VERSAO = 'volta:versao';
+// Lista branca das campanhas. Sem ela, um POST poderia mandar gravar em
+// QUALQUER chave do banco — inclusive sobrescrever volta:total com lixo.
+// O cliente manda o nome da campanha; quem escolhe a chave é este mapa.
+const CAMPANHAS = {
+  obra: 'volta:obra',
+  carnes: 'volta:carnes',
+  cofrinhos: 'volta:cofrinhos',
+};
+const CHAVES_CAMPANHAS = Object.keys(CAMPANHAS).map((k) => CAMPANHAS[k]);
 
-const LIMITE_POR_TOQUE = 500;      // trava um POST absurdo vindo de fora
+const LIMITE_POR_TOQUE = 25;       // trava um POST absurdo vindo de fora
 const LIMITE_CONFIG_BYTES = 32768; // a configuração é pequena; isso é folga
 
 function credenciais() {
@@ -86,13 +95,20 @@ module.exports = async (req, res) => {
 
   try {
     if (req.method === 'GET') {
-      const [total, config, versao] = await comando(cred, ['MGET', CHAVE_TOTAL, CHAVE_CONFIG, CHAVE_VERSAO]);
-      return res.status(200).json({
+      // Um MGET só: uma operação de Redis por consulta, independente de
+      // quantas campanhas existam.
+      const nomes = Object.keys(CAMPANHAS);
+      const valores = await comando(
+        cred, ['MGET', CHAVE_TOTAL, CHAVE_CONFIG, CHAVE_VERSAO].concat(CHAVES_CAMPANHAS)
+      );
+      const resposta = {
         armazenamento: true,
-        total: Number(total) || 0,
-        config: jsonOuNulo(config),
-        versao: Number(versao) || 0,
-      });
+        total: Number(valores[0]) || 0,
+        config: jsonOuNulo(valores[1]),
+        versao: Number(valores[2]) || 0,
+      };
+      nomes.forEach((nome, i) => { resposta[nome] = jsonOuNulo(valores[3 + i]); });
+      return res.status(200).json(resposta);
     }
 
     if (req.method === 'POST') {
@@ -100,10 +116,9 @@ module.exports = async (req, res) => {
       const acao = String(corpo.acao || '');
 
       if (acao === 'somar') {
-        const tokenMesa = process.env.TOKEN_MESA || '';
-        if (tokenMesa && String(corpo.token || '') !== tokenMesa) {
-          return res.status(401).json({ erro: 'Este aparelho não está autorizado a registrar doações.' });
-        }
+        // Sem token: o endpoint é aberto a quem tem o link. O limite baixo por
+        // requisição é a defesa — inflar o contador de forma perceptível
+        // exigiria milhares de chamadas, e o painel corrige o total em segundos.
         const n = Math.trunc(Number(corpo.n));
         if (!Number.isFinite(n) || n === 0 || Math.abs(n) > LIMITE_POR_TOQUE) {
           return res.status(400).json({ erro: 'Quantidade inválida.' });
@@ -129,6 +144,23 @@ module.exports = async (req, res) => {
         if (!Number.isFinite(valor)) return res.status(400).json({ erro: 'Valor inválido.' });
         const [, versao] = await lote(cred, [['SET', CHAVE_TOTAL, String(valor)], ['INCR', CHAVE_VERSAO]]);
         return res.status(200).json({ armazenamento: true, total: valor, versao: Number(versao) || 0 });
+      }
+
+      if (acao === 'guardar') {
+        if (!senhaCorreta(corpo.senha)) return res.status(401).json({ erro: 'Senha incorreta.' });
+        const chave = CAMPANHAS[String(corpo.campanha || '')];
+        if (!chave) return res.status(400).json({ erro: 'Campanha desconhecida.' });
+
+        const dados = corpo.dados;
+        if (!dados || typeof dados !== 'object' || Array.isArray(dados)) {
+          return res.status(400).json({ erro: 'Dados da campanha inválidos.' });
+        }
+        const texto = JSON.stringify(dados);
+        if (texto.length > LIMITE_CONFIG_BYTES) {
+          return res.status(413).json({ erro: 'Dados da campanha grandes demais.' });
+        }
+        const [, versao] = await lote(cred, [['SET', chave, texto], ['INCR', CHAVE_VERSAO]]);
+        return res.status(200).json({ armazenamento: true, versao: Number(versao) || 0 });
       }
 
       if (acao === 'config') {
