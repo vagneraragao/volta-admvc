@@ -2,9 +2,32 @@
 // React, ReactDOM e htm chegam como globais pelos <script> do index.html.
 
 import { Loja, fmt, menosMovimento } from './loja.js';
+import { caminhoDe } from './rotas.js';
 
 export const html = htm.bind(React.createElement);
 export const { useState, useEffect, useRef, useCallback } = React;
+
+/* ── Link de navegação ─────────────────────────────────────────────────
+   É uma âncora de verdade, com href real: dá para passar o mouse e ver o
+   endereço, abrir em nova janela com o botão do meio — útil para jogar o
+   telão numa segunda tela — ou salvar nos favoritos. O clique normal é
+   interceptado para trocar de tela sem recarregar. */
+
+export function Link({ para, irPara, className, rotulo, children }) {
+  return html`
+    <a
+      href=${caminhoDe(para)}
+      className=${className}
+      aria-label=${rotulo}
+      onClick=${(ev) => {
+        // Deixa o navegador cuidar de ctrl/cmd/shift-clique e do botão do meio.
+        if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey || ev.button !== 0) return;
+        ev.preventDefault();
+        irPara(para);
+      }}
+    >${children}</a>
+  `;
+}
 
 /* ── Contador que sobe animado ─────────────────────────────────────────── */
 
@@ -44,7 +67,7 @@ export function BarraProgresso({ pct, alto, escuro }) {
   const batida = pct >= 100;
   return html`
     <div
-      className=${'w-full overflow-hidden rounded-full ' + (alto ? 'h-8 md:h-12' : 'h-4') + ' ' + (escuro ? 'bg-grafite-3' : 'bg-creme-2')}
+      className=${'w-full overflow-hidden rounded-full ' + (alto ? 'h-8 md:h-12' : 'h-4') + ' ' + (escuro ? 'bg-carvao-2' : 'bg-creme-2')}
       role="progressbar"
       aria-valuenow=${Math.round(pct)}
       aria-valuemin="0"
@@ -52,7 +75,7 @@ export function BarraProgresso({ pct, alto, escuro }) {
       aria-label="Progresso da meta"
     >
       <div
-        className=${'h-full rounded-full barra-vidro transition-[width] duration-700 ease-out ' + (batida ? 'bg-dourado' : 'bg-verde')}
+        className=${'h-full rounded-full barra-vidro transition-[width] duration-700 ease-out ' + (batida ? 'bg-ciano' : 'bg-amarelo')}
         style=${{ width: largura + '%' }}
       ></div>
     </div>
@@ -63,10 +86,10 @@ export function BarraProgresso({ pct, alto, escuro }) {
 
 export function SeloSync({ sync, escuro }) {
   const mapa = {
-    iniciando: { texto: 'conectando', ponto: 'bg-dourado' },
-    nuvem: { texto: 'sincronizado', ponto: 'bg-verde' },
-    local: { texto: 'somente neste aparelho', ponto: 'bg-dourado' },
-    erro: { texto: 'sem conexão', ponto: 'bg-dourado' },
+    iniciando: { texto: 'conectando', ponto: 'bg-tinta-suave' },
+    nuvem: { texto: 'sincronizado', ponto: 'bg-ciano' },
+    local: { texto: 'somente neste aparelho', ponto: 'bg-amarelo' },
+    offline: { texto: 'sem conexão', ponto: 'bg-amarelo' },
   };
   const s = mapa[sync] || mapa.iniciando;
   return html`
@@ -82,10 +105,10 @@ export function Marca({ escuro, compacto }) {
   return html`
     <div className="flex items-center gap-3">
       <div
-        className=${'grid place-items-center rounded-2xl bg-verde-fundo ' + (compacto ? 'w-11 h-11' : 'w-14 h-14')}
+        className=${'grid place-items-center rounded-2xl bg-amarelo ' + (compacto ? 'w-11 h-11' : 'w-14 h-14')}
         aria-hidden="true"
       >
-        <svg viewBox="0 0 32 32" className=${compacto ? 'w-6 h-6' : 'w-8 h-8'} fill="none" stroke="#5FD683" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 32 32" className=${compacto ? 'w-6 h-6' : 'w-8 h-8'} fill="none" stroke="#101211" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M13 3h6v3.2c0 1.2.5 2.3 1.4 3.1l1.2 1.1c1.2 1.1 1.9 2.7 1.9 4.3V27a2 2 0 0 1-2 2H10.5a2 2 0 0 1-2-2V14.7c0-1.6.7-3.2 1.9-4.3l1.2-1.1C12.5 8.5 13 7.4 13 6.2V3Z"></path>
           <path d="M9 19h14"></path>
         </svg>
@@ -94,9 +117,32 @@ export function Marca({ escuro, compacto }) {
         <div className=${'font-display font-black tracking-tight ' + (compacto ? 'text-2xl' : 'text-3xl') + ' ' + (escuro ? 'text-creme' : 'text-tinta')}>
           VOLTA
         </div>
-        <div className=${'rotulo text-[10px] mt-1 ' + (escuro ? 'text-verde-claro' : 'text-verde-fundo')}>ADMVC · Nova Sede</div>
+        <div className=${'rotulo text-[10px] mt-1 ' + (escuro ? 'text-creme/60' : 'text-tinta-suave')}>ADMVC · Nova Sede</div>
       </div>
     </div>
+  `;
+}
+
+/** "Toma lá, Dá cá" — o bordão do VOLTA, na manuscrita da marca deles.
+ *  É o único lugar onde essa fonte aparece. */
+export function Assinatura({ texto, escuro, className }) {
+  if (!texto) return null;
+  return html`
+    <span className=${'marker leading-none ' + (escuro ? 'text-amarelo' : 'text-preto') + ' ' + (className || '')}>
+      ${texto}
+    </span>
+  `;
+}
+
+/** Uma passagem bíblica. A serifada é exclusiva da Palavra.
+ *  A referência NÃO pode se chamar `ref`: o React reserva esse nome e a prop
+ *  nunca chegaria aqui — a referência simplesmente sumiria da tela. */
+export function Escritura({ texto, referencia, className }) {
+  if (!texto) return null;
+  return html`
+    <p className=${'escritura ' + (className || '')}>
+      “${texto}”${referencia ? html` <span className="ref">${referencia}</span>` : null}
+    </p>
   `;
 }
 
@@ -117,7 +163,7 @@ export function Confete({ gatilho, forte }) {
     cv.width = L * dpr; cv.height = A * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    const cores = ['#2FB65A', '#5FD683', '#D9A441', '#F2F4F0', '#14663A'];
+    const cores = ['#F5E600', '#D9CC00', '#0CC3D7', '#F7F7F4', '#2A2D2B'];
     const pecas = [];
     const quantas = forte ? 220 : 110;
     for (let i = 0; i < quantas; i++) {

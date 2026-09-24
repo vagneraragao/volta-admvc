@@ -5,7 +5,7 @@
   "description": "Campanha VOLTA da ADMVC — mesa de coleta, telão e administração da arrecadação de retornáveis para a Nova Sede.",
   "scripts": {
     "dev": "vercel dev",
-    "servir": "npx --yes serve ."
+    "servir": "npx --yes serve . -s"
   },
   "engines": {
     "node": ">=18"

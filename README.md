@@ -6,10 +6,28 @@ São três telas no mesmo endereço:
 | Tela | Onde roda | O que faz |
 |---|---|---|
 | **Mesa de coleta** | tablet na mesa | botões gigantes para registrar as garrafas entregues |
-| **Telão** | máquina ligada no projetor | contador e fotos da obra, alternando sozinho |
+| **Telão** | máquina ligada no projetor | contador, Palavra e fotos da obra, alternando sozinho |
 | **Administração** | qualquer aparelho | meta, frases de agradecimento e correção do contador |
 
 Sem framework, sem passo de build, sem `npm install` para publicar. `git push` é o deploy.
+
+## Identidade e Escrituras
+
+A cara é a do **volta.com.pt** — amarelo `#F5E600` sobre quase-preto `#101211`, com ciano
+`#0CC3D7` marcando a meta batida — e as fontes são as deles: **Albert Sans** na interface e
+**Permanent Marker** na assinatura *"Toma lá, Dá cá"*. A igreja entra pelo conteúdo, não pela
+cor: a **Fraunces** serifada é usada **só** nas passagens bíblicas, o que separa a Palavra do
+resto da tela num piscar de olhos.
+
+O eixo da campanha é **Lucas 6.38**: *"Deem aos outros, e Deus dará a vocês."* O bordão de
+reciclagem português é, palavra por palavra, a economia do Reino. E **1 Crônicas 29.14** —
+*"tudo vem de ti, e nós somente devolvemos o que já era teu"* — fala em **devolver** numa
+campanha de **retornáveis**.
+
+As treze passagens padrão estão na **NTLH** e foram conferidas no texto, não escritas de
+memória. Cada mensagem tem três partes: o agradecimento (que se adapta à quantidade com `{n}`
+e `{garrafas}`), a passagem e a referência. As passagens também entram no rodízio do telão.
+Para trocar de tradução, edite pelo painel: *Admin → Banco de mensagens*.
 
 ---
 
@@ -74,15 +92,23 @@ salvo naquele navegador; não precisa repetir.
 
 ## Montar na igreja
 
-**No tablet da mesa:** abra o site. Ele já abre na tela de coleta. Coloque em tela cheia e
-deixe ligado na tomada.
+Cada tela tem o seu próprio endereço — é só guardar nos favoritos do aparelho:
 
-**Na máquina do projetor:** abra o mesmo site e toque em **Telão**, no rodapé. O aparelho
-lembra dessa escolha para sempre. Você também pode salvar direto o endereço com `#/telao` no
-final como favorito.
+| Endereço | Tela |
+|---|---|
+| `seu-site.vercel.app/` | mesa de coleta |
+| `seu-site.vercel.app/telao` | telão do projetor |
+| `seu-site.vercel.app/admin` | administração |
 
-**Para entrar na administração:** engrenagem discreta no canto inferior direito da mesa de
-coleta, ou `#/admin` no final do endereço.
+**No tablet da mesa:** abra o endereço raiz. Coloque em tela cheia e deixe ligado na tomada.
+
+**Na máquina do projetor:** abra `/telao` direto e salve nos favoritos. Os links dentro do app
+são âncoras de verdade, então dá para clicar com o botão do meio e abrir o telão numa segunda
+janela, para jogar no projetor sem perder a tela da mesa.
+
+**Para entrar na administração:** `/admin`, ou a engrenagem discreta no rodapé da mesa.
+
+Endereços antigos com `#/telao` e `#/admin` continuam funcionando.
 
 O botão **−1 corrigir** desfaz um toque duplo acidental, e só funciona sobre a entrega que
 está em andamento — para corrigir o total da campanha, use o painel de administração.
@@ -102,11 +128,17 @@ Com a lista vazia, o telão mostra só o contador — o que já funciona bem.
 ```
 index.html          casca: fontes, Tailwind, React/htm por CDN
 src/loja.js         estado, fila offline e conversa com a API
-src/ui.js           peças compartilhadas (contador animado, barra, confete)
+src/ui.js           peças compartilhadas (contador animado, barra, confete, link)
+src/rotas.js        /, /telao e /admin
 src/telas.js        Mesa, Telão e Admin
-src/app.js          escolhe a tela e monta o React
+src/app.js          escolhe a tela pela URL e monta o React
 api/estado.js       função serverless: lê e grava no Redis
 ```
+
+**As rotas precisam do servidor.** Recarregar a página em `/telao` só funciona porque o
+servidor devolve o `index.html` nesse caminho: no Vercel isso está em `vercel.json`
+(`rewrites`) e localmente o `npm run servir` usa `serve -s`. Um `npx serve .` sem o `-s` dá
+404 ao recarregar fora da raiz.
 
 **Três camadas de sincronia, empilhadas.** O `localStorage` pinta a tela no primeiro quadro e
 aguenta queda de rede. O `BroadcastChannel` atualiza janelas do mesmo navegador na hora, de
@@ -178,6 +210,10 @@ Command* na Vercel.
   comportamento certo (o número digitado é o total final), mas vale saber.
 - **Os logos são placeholders.** O ícone da garrafa em `src/ui.js` (componente `Marca`) e o
   favicon no `index.html` esperam a arte real da ADMVC e do programa VOLTA.
+- **Confira as passagens.** Extraí os textos da NTLH da fonte, mas quem responde pela Palavra
+  no púlpito é você — vale conferir duas ou três contra a sua Bíblia antes do primeiro culto.
+- **Uma frase sem passagem não entra no telão.** Ela continua aparecendo no agradecimento do
+  tablet; só fica de fora do rodízio da Palavra, que precisa de um versículo para mostrar.
 #   v o l t a - a d m v c  
  #   v o l t a - a d m v c  
  

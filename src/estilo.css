@@ -2,18 +2,18 @@
    As cores também estão no tailwind.config dentro do index.html — mude aqui e lá. */
 
 :root {
-  --verde: #2FB65A;
-  --verde-claro: #5FD683;
-  --verde-fundo: #14663A;
-  --verde-noite: #0C3A22;
-  --grafite: #1B1D1A;
-  --grafite-2: #262925;
-  --grafite-3: #343830;
-  --creme: #F2F4F0;
-  --creme-2: #E4E8E0;
-  --dourado: #D9A441;
-  --tinta: #14171A;
-  --tinta-suave: #5A635C;
+  /* Identidade do volta.com.pt: o amarelo é a cor do símbolo deles. */
+  --amarelo: #F5E600;
+  --amarelo-2: #D9CC00;
+  --preto: #101211;
+  --carvao: #2A2D2B;
+  --carvao-2: #3C403D;
+  --ciano: #0CC3D7;
+  --ciano-2: #08A3B4;
+  --creme: #F7F7F4;
+  --creme-2: #E6E6E0;
+  --tinta: #101211;
+  --tinta-suave: #6B6F6C;
 
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -25,23 +25,57 @@ body {
   margin: 0;
   background: var(--creme);
   color: var(--tinta);
-  font-family: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: 'Albert Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   overscroll-behavior: none;
 }
 
 /* O quiosque não segue o tema claro/escuro do sistema: um telão que muda de
    cor sozinho ao anoitecer é defeito, não recurso. A mesa é sempre clara
-   (salão iluminado) e o telão sempre grafite (projeção). */
-body[data-modo="telao"] { background: var(--grafite); color: var(--creme); }
+   (salão iluminado) e o telão sempre preto (projeção). */
+body[data-modo="telao"] { background: var(--preto); color: var(--creme); }
 
 #raiz { min-height: 100%; }
 
+/* O telão monta todos os seus slides com position:absolute, que não geram
+   altura nenhuma. Com `min-height: 100%` a caixa resolveria contra a altura
+   AUTO do #raiz — ou seja, zero — e a tela ficava preta e vazia. Amarrar à
+   altura da janela não depende de nenhum ancestral. */
+.tela-cheia {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
 img { max-width: 100%; }
 
-.num { font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
-.serifa { font-family: 'Fraunces', Georgia, serif; }
+.num { font-variant-numeric: tabular-nums; letter-spacing: -0.03em; }
 .rotulo { text-transform: uppercase; letter-spacing: 0.14em; font-weight: 700; }
+
+/* Três faces, três trabalhos, nenhuma decorativa:
+   Albert Sans é a interface, a Marker é SÓ a assinatura "Toma lá, Dá cá"
+   (usada em mais lugares viraria piada num culto) e a serifada é SÓ a
+   Palavra — é o que separa visualmente a Escritura do resto da tela. */
+.marker {
+  font-family: 'Permanent Marker', 'Comic Sans MS', cursive;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+.serifa,
+.escritura { font-family: 'Fraunces', Georgia, serif; }
+
+.escritura {
+  font-style: italic;
+  text-wrap: balance;
+}
+
+.escritura .ref {
+  font-family: 'Albert Sans', system-ui, sans-serif;
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+}
 
 /* Alvos de toque: sem zoom por duplo toque, sem flash azul, sem seleção. */
 .toque {
@@ -54,17 +88,18 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
+a:focus-visible,
 [tabindex]:focus-visible {
-  outline: 3px solid var(--dourado);
+  outline: 3px solid var(--ciano);
   outline-offset: 3px;
 }
 
-@keyframes pulsoVerde {
+@keyframes pulsoToque {
   0% { transform: scale(1); }
   40% { transform: scale(0.97); }
   100% { transform: scale(1); }
 }
-.pulso { animation: pulsoVerde 200ms ease-out; }
+.pulso { animation: pulsoToque 200ms ease-out; }
 
 @keyframes entraModal {
   from { opacity: 0; transform: translateY(24px) scale(0.96); }
@@ -88,6 +123,8 @@ textarea:focus-visible,
   .pulso, .entra-modal, .kenburns, .entra-slide { animation: none !important; }
 }
 
+/* Brilho sobre a barra. Sobre amarelo um véu branco some, então o degradê
+   vai de clarear no topo a escurecer embaixo, que lê nas duas telas. */
 .barra-vidro {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.12));
 }

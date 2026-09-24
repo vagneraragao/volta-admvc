@@ -4,14 +4,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="Campanha VOLTA da ADMVC — contagem de garrafas retornáveis para a construção da Nova Sede.">
-  <meta name="theme-color" content="#14663A">
+  <meta name="theme-color" content="#F5E600">
   <title>VOLTA ADMVC</title>
 
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2314663A'/><path d='M13 4h6v3.2c0 1.2.5 2.3 1.4 3.1l1.2 1.1c1.2 1.1 1.9 2.7 1.9 4.3V27a2 2 0 0 1-2 2H10.5a2 2 0 0 1-2-2V15.7c0-1.6.7-3.2 1.9-4.3l1.2-1.1C12.5 9.5 13 8.4 13 7.2V4Z' fill='none' stroke='%235FD683' stroke-width='2.2' stroke-linejoin='round'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23F5E600'/><path d='M13 4h6v3.2c0 1.2.5 2.3 1.4 3.1l1.2 1.1c1.2 1.1 1.9 2.7 1.9 4.3V27a2 2 0 0 1-2 2H10.5a2 2 0 0 1-2-2V15.7c0-1.6.7-3.2 1.9-4.3l1.2-1.1C12.5 9.5 13 8.4 13 7.2V4Z' fill='none' stroke='%23101211' stroke-width='2.2' stroke-linejoin='round'/></svg>">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap">
+  <!-- Albert Sans e Permanent Marker são as fontes do próprio volta.com.pt.
+       A Fraunces entra só para as Escrituras, separando a Palavra da interface. -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600;700;800;900&family=Permanent+Marker&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap">
 
   <link rel="stylesheet" href="src/estilo.css">
 
@@ -23,22 +25,23 @@
     tailwind.config = {
       theme: {
         extend: {
+          // Cores da identidade do volta.com.pt, extraídas do CSS deles.
           colors: {
-            verde: '#2FB65A',
-            'verde-claro': '#5FD683',
-            'verde-fundo': '#14663A',
-            'verde-noite': '#0C3A22',
-            grafite: '#1B1D1A',
-            'grafite-2': '#262925',
-            'grafite-3': '#343830',
-            creme: '#F2F4F0',
-            'creme-2': '#E4E8E0',
-            dourado: '#D9A441',
-            tinta: '#14171A',
-            'tinta-suave': '#5A635C',
+            amarelo: '#F5E600',
+            'amarelo-2': '#D9CC00',
+            preto: '#101211',
+            carvao: '#2A2D2B',
+            'carvao-2': '#3C403D',
+            ciano: '#0CC3D7',
+            'ciano-2': '#08A3B4',
+            creme: '#F7F7F4',
+            'creme-2': '#E6E6E0',
+            tinta: '#101211',
+            'tinta-suave': '#6B6F6C',
           },
           fontFamily: {
-            display: ['Archivo', 'system-ui', 'sans-serif'],
+            display: ['Albert Sans', 'system-ui', 'sans-serif'],
+            marker: ['Permanent Marker', 'Comic Sans MS', 'cursive'],
             serifa: ['Fraunces', 'Georgia', 'serif'],
           },
           // A escala padrão pula degraus (15, 35, 45, 65…) e os modificadores
@@ -61,10 +64,20 @@
   <!-- O conteúdo abaixo é substituído pelo React ao montar. Ele existe para
        que um tablet com a rede ruim veja uma explicação em vez de tela branca. -->
   <div id="raiz">
-    <div id="aviso-carregando" style="padding:32px;max-width:34rem;margin:0 auto;font-family:system-ui,sans-serif;color:#5A635C">
-      <p style="font-size:1.5rem;font-weight:800;color:#14663A;margin:0 0 .5rem">VOLTA · ADMVC</p>
-      <p style="margin:0">Carregando a campanha…</p>
-      <p id="aviso-falha" hidden style="margin:1rem 0 0;padding:1rem;border-radius:.75rem;background:#FBF3E2;color:#14171A">
+    <div id="aviso-carregando" style="padding:32px;max-width:34rem;margin:0 auto;font-family:system-ui,sans-serif;color:#6B6F6C">
+      <p style="font-size:1.5rem;font-weight:800;color:#101211;margin:0 0 .5rem">VOLTA · ADMVC</p>
+      <p id="texto-carregando" style="margin:0">Carregando a campanha…</p>
+      <p id="aviso-arquivo" hidden style="margin:1rem 0 0;padding:1rem;border-radius:.75rem;background:#F5E600;color:#101211">
+        <strong>Esta página foi aberta como arquivo, e assim ela não funciona.</strong><br>
+        O navegador bloqueia parte do código quando o endereço começa com
+        <code>file://</code>. Não é defeito da página: é uma regra de segurança do
+        próprio navegador.<br><br>
+        Use o endereço do site publicado (algo como
+        <code>volta-admvc.vercel.app</code>). Para testar nesta máquina, abra o
+        terminal na pasta do projeto e rode <code>npm run servir</code>.
+      </p>
+
+      <p id="aviso-falha" hidden style="margin:1rem 0 0;padding:1rem;border-radius:.75rem;background:#F5E600;color:#101211">
         <strong>Não consegui carregar os componentes da página.</strong><br>
         Isso quase sempre é a internet do aparelho. Confira a conexão e recarregue.
       </p>
@@ -78,14 +91,26 @@
   </noscript>
 
   <script>
-    // Se React, ReactDOM ou htm não chegaram do CDN, o app não monta — então
-    // troque o "carregando" por algo que diga o que houve.
+    // O React substitui todo o conteúdo de #raiz ao montar. Se depois de alguns
+    // segundos o "carregando" ainda estiver na tela, o app NÃO montou — e aí o
+    // usuário precisa saber por quê, em vez de encarar um texto parado.
+    //
+    // São duas causas distintas, e a mensagem certa importa:
+    //   file://  o navegador bloqueia módulos ES abertos como arquivo;
+    //   online   algum script do CDN não chegou.
+    var comoArquivo = location.protocol === 'file:';
+
     setTimeout(function () {
-      var faltou = !window.React || !window.ReactDOM || !window.htm;
-      var aindaNaTela = document.getElementById('aviso-carregando');
-      var falha = document.getElementById('aviso-falha');
-      if (faltou && aindaNaTela && falha) falha.hidden = false;
-    }, 6000);
+      if (!document.getElementById('aviso-carregando')) return;   // montou, tudo certo
+
+      var alvo = document.getElementById(comoArquivo ? 'aviso-arquivo' : 'aviso-falha');
+      if (alvo) alvo.hidden = false;
+
+      var carregando = document.getElementById('texto-carregando');
+      if (carregando) carregando.hidden = true;
+      // Por file:// a falha é imediata e certa — não faz sentido deixar a
+      // pessoa esperando seis segundos por uma resposta que já se conhece.
+    }, comoArquivo ? 700 : 6000);
   </script>
 
   <script type="module" src="src/app.js"></script>

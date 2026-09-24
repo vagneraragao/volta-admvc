@@ -22,25 +22,115 @@
 // espera na fila; quando a resposta chega dizendo que não há, a fila é dobrada
 // dentro do total local. Nada se perde nos dois casos.
 
+// As passagens estão na NTLH e foram conferidas no texto, não escritas de
+// memória. O eixo da campanha é Lucas 6.38: "Toma lá, dá cá" — o bordão do
+// VOLTA — é, palavra por palavra, a economia do Reino. E 1 Crônicas 29.14 fala
+// em DEVOLVER ao Dono, numa campanha de retornáveis.
 export const CONFIG_PADRAO = {
   igreja: 'ADMVC',
   titulo: 'VOLTA',
   subtitulo: 'Campanha dos Retornáveis',
+  tagline: 'Toma lá, Dá cá',
   chamada: 'Cada garrafa conta para a construção da nossa Nova Sede!',
   meta: 5000,
   segundosSlide: 10,
-  versiculo: 'Se o Senhor não edificar a casa, em vão trabalham os que a edificam.',
-  versiculoRef: 'Salmos 127.1',
+  traducao: 'NTLH',
+  versiculo: 'Deem aos outros, e Deus dará a vocês.',
+  versiculoRef: 'Lucas 6.38',
   mensagens: [
-    'Obrigado por doar {n} {garrafas}! Cada uma vira tijolo da nossa Nova Sede.',
-    'Que Deus abençoe sua oferta de {n} {garrafas}! A obra avança com você.',
-    '{n} {garrafas} a mais para a Nova Sede. Deus honra quem semeia com alegria!',
-    'Sua contribuição de {n} {garrafas} já está levantando paredes. Obrigado!',
-    'Recebemos {n} {garrafas}! Juntos estamos construindo a casa do Senhor.',
-    'Obrigado! Com {n} {garrafas} você plantou hoje na obra da Nova Sede.',
-    'Deus abençoe! {n} {garrafas} entregues com amor pela nossa igreja.',
+    {
+      texto: 'Toma lá, dá cá! {n} {garrafas} que voltam e viram Nova Sede.',
+      versiculo: 'Deem aos outros, e Deus dará a vocês.',
+      ref: 'Lucas 6.38',
+    },
+    {
+      texto: 'Você devolveu {n} {garrafas} — e devolveu ao Dono.',
+      versiculo: 'Tudo vem de ti, e nós somente devolvemos o que já era teu.',
+      ref: '1 Crônicas 29.14',
+    },
+    {
+      texto: 'Obrigado! {n} {garrafas} viram madeira e tijolo da nossa casa.',
+      versiculo: 'Vão até as montanhas, tragam madeira e construam de novo o Templo.',
+      ref: 'Ageu 1.8',
+    },
+    {
+      texto: '{n} {garrafas} entregues com alegria. Deus abençoe!',
+      versiculo: 'Deus ama quem dá com alegria.',
+      ref: '2 Coríntios 9.7',
+    },
+    {
+      texto: 'Nenhuma garrafa é pequena demais. Obrigado pelas suas {n} {garrafas}!',
+      versiculo: 'Esta viúva pobre deu mais do que todos.',
+      ref: 'Marcos 12.43',
+    },
+    {
+      texto: 'Mais {n} {garrafas} para a Nova Sede. Que o Senhor edifique esta casa!',
+      versiculo: 'Se o Senhor Deus não edificar a casa, não adianta nada trabalhar para construí-la.',
+      ref: 'Salmos 127.1',
+    },
+    {
+      texto: 'A obra avança e você faz parte dela: {n} {garrafas}!',
+      versiculo: 'Vamos começar a reconstrução!',
+      ref: 'Neemias 2.18',
+    },
+    {
+      texto: 'Começo humilde, promessa grande. Obrigado pelas {n} {garrafas}!',
+      versiculo: 'Os que não deram valor a um começo tão humilde vão ficar alegres.',
+      ref: 'Zacarias 4.10',
+    },
+    {
+      texto: 'Seu esforço conta: {n} {garrafas} a mais na obra da Nova Sede.',
+      versiculo: 'Todo o seu esforço nesse trabalho sempre traz proveito.',
+      ref: '1 Coríntios 15.58',
+    },
+    {
+      texto: '{n} {garrafas} trazidas de boa vontade. Deus abençoe!',
+      versiculo: 'Todos os israelitas trouxeram de muita boa vontade as suas ofertas.',
+      ref: 'Êxodo 35.29',
+    },
+    {
+      texto: 'Mais {n} {garrafas}! A construção da nossa casa já começou.',
+      versiculo: 'Todo o povo louvava o Senhor porque a construção do seu novo Templo já havia começado.',
+      ref: 'Esdras 3.11',
+    },
+    {
+      texto: 'Obrigado por trazer {n} {garrafas} — Deus recebe o coração.',
+      versiculo: 'Se alguém quer dar, Deus aceita a oferta conforme o que a pessoa tem.',
+      ref: '2 Coríntios 8.12',
+    },
+    {
+      texto: '{n} {garrafas} que viram tesouro que não enferruja.',
+      versiculo: 'Ajuntem riquezas no céu.',
+      ref: 'Mateus 6.20',
+    },
   ],
 };
+
+/** Aceita o formato antigo (texto puro) sem quebrar o que já está gravado no
+ *  Redis em produção — vira `{ texto }` e ganha os campos vazios. */
+export function normalizarMensagens(lista) {
+  if (!Array.isArray(lista)) return CONFIG_PADRAO.mensagens;
+  const limpas = lista
+    .map((m) => {
+      if (typeof m === 'string') return { texto: m, versiculo: '', ref: '' };
+      if (!m || typeof m !== 'object') return null;
+      return {
+        texto: String(m.texto || ''),
+        versiculo: String(m.versiculo || ''),
+        ref: String(m.ref || ''),
+      };
+    })
+    .filter((m) => m && m.texto.trim());
+  return limpas.length ? limpas : CONFIG_PADRAO.mensagens;
+}
+
+/** Ponto único de junção da configuração: tudo que chega de fora — do
+ *  localStorage, de outra aba ou do servidor — passa por aqui. */
+export function mesclarConfig(bruta) {
+  const c = Object.assign({}, CONFIG_PADRAO, bruta || {});
+  c.mensagens = normalizarMensagens(c.mensagens);
+  return c;
+}
 
 /** Só vale no modo sem servidor. Com o Redis ligado, quem confere a senha é a
  *  função em api/estado.js, usando a variável SENHA_ADMIN. */
@@ -49,7 +139,6 @@ export const SENHA_LOCAL = '1234';
 const CHAVE_ESTADO = 'volta-admvc/estado/v2';
 const CHAVE_FILA = 'volta-admvc/fila/v2';      // sessionStorage: por aba, de propósito
 const CHAVE_TOKEN = 'volta-admvc/token-mesa/v1';
-const CHAVE_MODO = 'volta-admvc/modo/v1';
 const NOME_CANAL = 'volta-admvc';
 const ROTA_API = '/api/estado';
 
@@ -87,7 +176,7 @@ export const gravarLS = (chave, valor) => gravar(localStorage, chave, valor);
 const salvo = lerLS(CHAVE_ESTADO, null) || {};
 
 let estado = {
-  config: Object.assign({}, CONFIG_PADRAO, salvo.config || {}),
+  config: mesclarConfig(salvo.config),
   totalServidor: Number(salvo.totalServidor) || 0,
   pendentes: Number(ler(sessionStorage, CHAVE_FILA, 0)) || 0,
   versao: Number(salvo.versao) || 0,
@@ -135,7 +224,7 @@ function aplicar(parcial, opcoes) {
 
 function adotarDeOutraAba(c) {
   aplicar({
-    config: Object.assign({}, CONFIG_PADRAO, c.config || {}),
+    config: mesclarConfig(c.config),
     totalServidor: Number(c.totalServidor) || 0,
     versao: Number(c.versao) || 0,
     ultimaMudancaEm: Date.now(),
@@ -233,9 +322,6 @@ export const Loja = {
     try { localStorage.setItem(CHAVE_TOKEN, String(valor || '')); } catch (e) { /* sem espaço */ }
   },
 
-  modo: () => lerLS(CHAVE_MODO, null),
-  definirModo(m) { gravarLS(CHAVE_MODO, m); },
-
   /** Registra a doação na hora. Para onde ela vai depende de haver servidor. */
   somar(n) {
     const atual = Loja.total();
@@ -262,7 +348,7 @@ export const Loja = {
       }
 
       const parcial = { armazenamento: true, sync: 'nuvem' };
-      if (r.config) parcial.config = Object.assign({}, CONFIG_PADRAO, r.config);
+      if (r.config) parcial.config = mesclarConfig(r.config);
       // Enquanto uma remessa está no ar, o total do servidor já pode incluí-la
       // sem que a fila tenha sido baixada: ignorar evita contar duas vezes.
       if (!enviando) {
