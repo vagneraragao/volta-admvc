@@ -1,0 +1,13 @@
+{
+  "name": "volta-admvc",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Campanha VOLTA da ADMVC — mesa de coleta, telão e administração da arrecadação de retornáveis para a Nova Sede.",
+  "scripts": {
+    "dev": "vercel dev",
+    "servir": "npx --yes serve ."
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
